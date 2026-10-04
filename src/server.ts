@@ -1,42 +1,48 @@
 import express, { response } from "express";
-import "dotenv/config"
-import {supabase} from "./config/supabaseClient.js"
+import "dotenv/config";
+import { supabase } from "./config/supabaseClient.js";
 const app = express();
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 
+app.get("/products", async (req, res) => {
+  const { data, error } = await supabase.from("products").select();
 
+  if (error) {
+    console.error(error);
+    return res.status(500).json({error: "something went wrong"});
+  }
 
-app.get("/products", async ( req,res ) => {
-    const {data, error} = await supabase
-    .from("products")
-    .select()
-})
-
+  return res.send(data);
+});
 
 app.get("/products/:id", async (req, res) => {
-const {data ,error} = await supabase
-.from("products")
-.select()
- .eq("id", req.params.id)
-
-
-if(error){
-return res.send("404 not found")
-}
-
-return res.send(data);
-})
-
-app.post("/products", async (req, res) =>{
-    const {data, error} = await supabase 
+  const { data, error } = await supabase
     .from("products")
-    .insert({"data.id": 45, "data.name": "Matt's test test", "data.price": 1.00, "data.stock": 5  })
     .select()
-})
+    .eq("id", req.params.id)
+    .maybeSingle();
+
+  if (error) {
+    return res.status(500).json({error: "Something went wrong"});
+  }
+
+  if(!data){
+    return res.status(404).json({error: "Product was not fount"});
+  }
+
+  return res.json(data);
+
+ 
+});
+
+
+app.post("/products", async (req, res) => {
+  const { data, error } = await supabase
+    .from("products")
+    .insert({ id: 45, name: "Matt's test test", price: 1.0, stock: 5 })
+    .select();
+});
 
 
 
 app.listen(3001, () => console.log("Server running on port: 3001"));
-
-
- 

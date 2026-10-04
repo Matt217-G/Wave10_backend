@@ -57,8 +57,8 @@ app.put("/products/:id", async (req, res) => {
   const updatingInformation = req.body;
   const { data, error } = await supabase
     .from("products")
-    .update({ 
-      description: updatingInformation.description ,
+    .update({
+      description: updatingInformation.description,
       name: updatingInformation.name,
       price: updatingInformation.price,
       stock: updatingInformation.stock,
@@ -75,6 +75,27 @@ app.put("/products/:id", async (req, res) => {
     return res.status(404).json({ error: "product was not found" });
   }
 
+  return res.status(200).json(data);
+});
+
+app.delete("/products/:id", async (req, res) => {
+  
+  const { data, error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", req.params.id)
+    .select()
+    .maybeSingle();
+  
+    if (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Could not delete product" });
+  }
+ 
+  if (!data) {
+    return res.status(404).json({ error: "product was not found" });
+  }
+  
   return res.status(200).json(data);
 });
 
